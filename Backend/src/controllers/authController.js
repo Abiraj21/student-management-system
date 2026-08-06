@@ -81,13 +81,20 @@ exports.login = async (req,res) =>{
             },
             process.env.JWT_SECRET,
             {
-                expiresIn : "id"
+                expiresIn : "1d"
             }
         );
 
         return res.status(200).json({
             success : true,
-            message: "Login successful"
+            message: "Login successful",
+            token,
+            user: {
+               id: user._id,
+               name: user.name,
+               email: user.email,
+               role: user.role 
+            }
         });
 
     }catch(error){
