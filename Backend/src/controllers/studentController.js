@@ -1,36 +1,35 @@
 const Student = require("../models/Student");
+const AppError = require("../utils/AppError");
 
-exports.getStudents = async (req, res) => {
+exports.getStudents = async (req, res, next) => {
     try{
+        //throw new Error("Testing global error handler");
+        
         const allStudents = await Student.find();
         res.json(allStudents)
     }catch(error){
-        return res.status(500).json({
-            error: error.message
-        });
+        next(error);
     }
 };
 
-exports.getStudent =  async (req,res) => {
+exports.getStudent =  async (req,res,next) => {
     try{
         const student = await Student.findById(req.params.id);
 
+        throw new Error("Testing global error handler");
+
         if(!student){
-            res.status(404).json({
-                error: "The student does not exist"
-            });
+            throw new AppError("Student not found", 404);
         }else{
             Success:true,
             res.json(student);
         }
     }catch(error){
-        res.status(400).json({
-            error:error.message
-        });
+        next(error);
     }
 };
 
-exports.addStudent = async (req,res) => {
+exports.addStudent = async (req,res,next) => {
     try{
 
         const {studentId, firstName, lastName, email, phone, course, year, profileImage, createdBy} = req.body;
@@ -62,13 +61,11 @@ exports.addStudent = async (req,res) => {
             })
         }
     }catch(error){
-        res.status(400).json({
-            error:error.message
-        });
+        next(error);
     }
 };
 
-exports.updateStudent = async (req,res) => {
+exports.updateStudent = async (req,res,next) => {
     try{
         const student = await Student.findByIdAndUpdate(
             req.params.id,
@@ -90,13 +87,11 @@ exports.updateStudent = async (req,res) => {
             });
         }
     }catch(error){
-        res.status(400).json({
-            error:error.message
-        });
+        next(error);
     }
 };
 
-exports.deleteStudent = async (req,res) => {
+exports.deleteStudent = async (req,res,next) => {
     try{
         const student = await Student.findByIdAndDelete(req.params.id);
 
@@ -111,8 +106,6 @@ exports.deleteStudent = async (req,res) => {
             })
         }
     }catch(error){
-        res.status(400).json({
-            error:error.message
-        });
+        next(error);
     }
 };

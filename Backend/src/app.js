@@ -1,6 +1,7 @@
 const express = require("express");
 const studentRoutes = require("./routes/studentRoutes");
-const authRoutes = require("./routes/authRoutes")
+const authRoutes = require("./routes/authRoutes");
+const errorHandler = require("./middlewares/errorMiddleware");
 const app = express();
 
 //Middleware
@@ -17,5 +18,8 @@ app.get("/", (req,res)=>{
 //Student Routes
 app.use("/api/students", studentRoutes);
 app.use("/api/auth", authRoutes);
+
+//Error Handler middleware
+app.use(errorHandler);
 
 module.exports = app;
