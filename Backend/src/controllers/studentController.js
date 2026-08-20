@@ -1,12 +1,42 @@
 const Student = require("../models/Student");
 const AppError = require("../utils/AppError");
+const mongoose = require("mongoose");
+
+// exports.getStudents = async (req, res, next) => {
+//     try{
+//         //throw new Error("Testing global error handler");
+        
+//         const allStudents = await Student.find();
+//         res.json(allStudents)
+//     }catch(error){
+//         next(error);
+//     }
+// };
 
 exports.getStudents = async (req, res, next) => {
     try{
-        //throw new Error("Testing global error handler");
+        const page = Number(req.query.page) || 1;
+        let limit = Number(req.query.limit) || 10;
         
-        const allStudents = await Student.find();
-        res.json(allStudents)
+        limit = Math.min(limit, 100);
+        
+        const skip = ( page - 1 ) * limit;
+
+        const allStudents = await Student.find().skip(skip).limit(limit);
+        const totalStudents = await Student.countDocuments();
+
+        const totalPages = Math.ceil(totalStudents/limit);
+
+        return res.status(200).json({
+            Success: true,
+            data: allStudents,
+            pagination: {
+                page,
+                limit,
+                total: totalStudents,
+                totalPages
+            }
+        });
     }catch(error){
         next(error);
     }
@@ -16,8 +46,11 @@ exports.getStudent =  async (req,res,next) => {
     try{
         const student = await Student.findById(req.params.id);
 
-        throw new Error("Testing global error handler");
+        //throw new Error("Testing global error handler");
 
+        if(!mongoose.isValidObjectId(req.params.id)){
+            throw new AppError("Invalid student ID", 400);
+        }
         if(!student){
             throw new AppError("Student not found", 404);
         }else{
