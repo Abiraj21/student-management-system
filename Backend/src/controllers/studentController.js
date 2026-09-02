@@ -17,13 +17,44 @@ exports.getStudents = async (req, res, next) => {
     try{
         const page = Number(req.query.page) || 1;
         let limit = Number(req.query.limit) || 10;
+        const search = req.query.search || "";
+        const course = req.query.course || "";
+        const year = req.query.year;
         
+        let query = {};
+
+        if(search){
+            query = {
+                $or: [
+                    {
+                        firstName : {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    },
+                    {
+                        lastname : {
+                            $regex: search,
+                            $options: "i"
+                        }
+                    }
+                ]
+            };
+        }
+
+        if(course){
+            query.course = course;
+        }
+
+        if(year){
+            query.year = Number(year);
+        }
+
         limit = Math.min(limit, 100);
-        
         const skip = ( page - 1 ) * limit;
 
-        const allStudents = await Student.find().skip(skip).limit(limit);
-        const totalStudents = await Student.countDocuments();
+        const allStudents = await Student.find(query).skip(skip).limit(limit);
+        const totalStudents = await Student.countDocuments(query);
 
         const totalPages = Math.ceil(totalStudents/limit);
 
